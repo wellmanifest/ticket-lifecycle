@@ -28,8 +28,18 @@ never becomes trusted merge authority.
   `6800f0138bc9063eb2dacb0a8b797dedcafb7952` because v0.16.1 had a tag but no
   verifiable final GitHub Release during bootstrap.
 - Initialized the target-owned Docker and repository carriers.
+- Verified the exact staging allowlist, absence of implementation and secret
+  patterns, adoption drift and Docker digest before creating local baseline
+  `dd80fc8e2b33ef0133e104a4b97329d69a64c3a9`.
+- Added the closed v1 schema, request-only GBNF, architecture/logic diagrams and
+  dependency-free conformance runner.
+- Governance passed with zero findings. Draft 2020-12, three positive documents,
+  eight adversarial cases, host conformance, isolated Docker and diff hygiene
+  all passed.
 
 ## Blockers
 
 - None inside the bounded local scope.
-- Remote creation and publication require separate authority.
+- The user's explicit push request resolves the remote/publication blocker for
+  public remote creation, ticket-branch push and pull-request creation only.
+- Trusted merge, tag and release remain outside this authorization.
