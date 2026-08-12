@@ -1,0 +1,2 @@
+2026-08-12 ADOPTION source=wellmanifest/new-project revision=6800f0138bc9063eb2dacb0a8b797dedcafb7952 version=0.16.0 publication=verified
+2026-08-12 V0161_PREFLIGHT result=rejected reason=no_verifiable_final_GitHub_Release
