@@ -1,0 +1,31 @@
+root ::= allocate | plan | authorize | edit | validate | publish | close | block | resume
+
+allocate ::= prefix "allocate\",\"ticket\":null,\"expectedState\":\"unallocated\",\"targetState\":\"allocated\",\"intentRef\":null,\"authorizationRef\":null" suffix
+plan ::= prefix "plan\",\"ticket\":" ticket ",\"expectedState\":\"allocated\",\"targetState\":\"planned\",\"intentRef\":" artifact ",\"authorizationRef\":null" suffix
+authorize ::= prefix "authorize\",\"ticket\":" ticket ",\"expectedState\":\"planned\",\"targetState\":\"authorized\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization suffix
+edit ::= prefix "edit\",\"ticket\":" ticket ",\"expectedState\":\"authorized\",\"targetState\":\"editing\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization suffix
+validate ::= prefix "validate\",\"ticket\":" ticket ",\"expectedState\":\"editing\",\"targetState\":\"validating\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization suffix
+publish ::= prefix "publish\",\"ticket\":" ticket ",\"expectedState\":\"validating\",\"targetState\":\"publication\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization suffix
+close ::= prefix "close\",\"ticket\":" ticket ",\"expectedState\":\"publication\",\"targetState\":\"done\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization suffix
+block ::= prefix "block\",\"ticket\":" ticket ",\"expectedState\":" block-source ",\"targetState\":\"blocked\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization suffix
+resume ::= prefix "resume\",\"ticket\":" ticket ",\"expectedState\":\"blocked\",\"targetState\":\"planned\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization suffix
+
+prefix ::= "{\"schema\":\"wellmanifest.ticket-lifecycle/v1\",\"kind\":\"transition-request\",\"requestId\":" request-id ",\"repositoryRef\":" repository ",\"workstreamRef\":" workstream ",\"action\":\""
+suffix ::= ",\"evidenceRefs\":" evidence-array ",\"idempotencyKey\":" idempotency "}"
+block-source ::= "\"allocated\"" | "\"planned\"" | "\"authorized\"" | "\"editing\"" | "\"validating\"" | "\"publication\""
+request-id ::= "\"request:" safe "\""
+repository ::= "\"repository:" safe "\""
+workstream ::= "\"workstream:" safe "\""
+ticket ::= "\"ticket-" digit digit digit "\""
+artifact ::= "\"artifact:" safe "\""
+authorization ::= "\"authorization:" safe "\""
+idempotency ::= "\"idempotency:" safe "\""
+evidence-array ::= "[" evidence-list "]"
+evidence-list ::= evidence | evidence "," evidence-list
+evidence ::= "\"" evidence-kind ":" safe "\""
+evidence-kind ::= "artifact" | "receipt" | "decision" | "knowledge"
+safe ::= lower safe-tail
+safe-tail ::= safe-char safe-tail | ""
+safe-char ::= lower | digit | "_" | "." | "-"
+lower ::= [a-z]
+digit ::= [0-9]

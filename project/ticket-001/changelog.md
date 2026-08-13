@@ -5,3 +5,10 @@
 - Initial governance scaffold created.
 - No human participant identity or content was generated.
 - Bound repository extraction to an autonomous, local-only seed transaction.
+- Added the standalone closed schema, request grammar, state-machine guidance,
+  logic flow and executable conformance contract.
+- Kept the valid v0.16.0 governance lock; recorded v0.16.1 as a separate
+  non-blocking governance upgrade rather than mixing it into implementation.
+- Recorded the later explicit authority for public remote creation,
+  ticket-branch push and pull-request creation; direct-main, merge, tag and
+  release effects remain excluded.
