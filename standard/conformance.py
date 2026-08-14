@@ -9,11 +9,18 @@ import json
 import re
 from pathlib import Path
 
+import lifecycle
+
 ROOT = Path(__file__).resolve().parent
 SCHEMA_PATH = ROOT / "ticket-lifecycle.schema.json"
 GRAMMAR_PATH = ROOT / "ticket-lifecycle.v1.gbnf"
+LIFECYCLE_PATH = ROOT / "ticket-lifecycle.lifecycle"
+LIFECYCLE_VALIDATOR_PATH = ROOT / "lifecycle.py"
 SCHEMA_DIGEST = "09f05e885634a65dd0e35c0ec74c23d9173b486e5dbb1b0abd690ccd0d7d6ba1"
 GRAMMAR_DIGEST = "3578a5b963d6b8c8e4e68df50bd9bfd0bb709584053227036826619bb429e8ee"
+LIFECYCLE_SOURCE_REVISION = "4b5e131a670afb46ca87291479fed7c0fefcf370"
+LIFECYCLE_VALIDATOR_DIGEST = "9c3f3076b5b45408d3eefc34cd567b58821aa565d3fe3bf6339641111079ede0"
+LIFECYCLE_PROFILE_DIGEST = "e107a2625d6819984749c9f0d03088cb3e903bec26245dec8ace85ddf76cc4fd"
 
 TRANSITIONS = {
     "allocate": ("unallocated", "allocated"), "plan": ("allocated", "planned"),
@@ -44,6 +51,41 @@ def canonical(value: object) -> bytes:
 
 def digest(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
+
+
+def lifecycle_name(value: str) -> str:
+    return value.upper().replace("-", "_")
+
+
+def validate_lifecycle_profile(schema: dict[str, object]) -> None:
+    if digest(LIFECYCLE_VALIDATOR_PATH.read_bytes()) != LIFECYCLE_VALIDATOR_DIGEST:
+        raise ContractError("pinned lifecycle validator digest mismatch")
+    if digest(LIFECYCLE_PATH.read_bytes()) != LIFECYCLE_PROFILE_DIGEST:
+        raise ContractError("pinned lifecycle profile digest mismatch")
+    report = lifecycle.validate_path(LIFECYCLE_PATH, lifecycle.embedded_catalog())
+    if not report.valid or len(report.lifecycles) != 1:
+        raise ContractError("Lifecycle DSL profile is invalid")
+    model = report.lifecycles[0]
+    state_values = schema["$defs"]["state"]["enum"]  # type: ignore[index]
+    expected_states = {lifecycle_name(str(value)) for value in state_values}
+    expected_transitions = {
+        (lifecycle_name(source), lifecycle_name(target), lifecycle_name(action))
+        for action, (source, target) in TRANSITIONS.items()
+    } | {
+        (lifecycle_name(source), "BLOCKED", "BLOCK")
+        for source in BLOCK_SOURCES
+    }
+    actual_transitions = {
+        (item.source, item.target, item.event) for item in model.transitions
+    }
+    if model.name != "governed-ticket" or set(model.states) != expected_states:
+        raise ContractError("Lifecycle DSL state graph mismatch")
+    if actual_transitions != expected_transitions:
+        raise ContractError("Lifecycle DSL transition graph mismatch")
+    if model.summary()["initial_state"] != "UNALLOCATED":
+        raise ContractError("Lifecycle DSL initial state mismatch")
+    if model.summary()["terminal_states"] != ["DONE"]:
+        raise ContractError("Lifecycle DSL terminal state mismatch")
 
 
 def reject_sensitive(value: object) -> None:
@@ -113,6 +155,7 @@ def expect_rejected(name: str, validator, base: dict[str, object], mutation) -> 
 
 def run_all() -> dict[str, object]:
     schema = json.loads(SCHEMA_PATH.read_text()); grammar = GRAMMAR_PATH.read_bytes()
+    validate_lifecycle_profile(schema)
     if digest(canonical(schema)) != SCHEMA_DIGEST or digest(grammar) != GRAMMAR_DIGEST:
         raise ContractError("contract digest mismatch")
     lowered = grammar.lower()

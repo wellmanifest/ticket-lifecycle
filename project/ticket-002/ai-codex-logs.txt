@@ -1,0 +1,29 @@
+2026-08-14T09:24:00+02:00 LIFECYCLE-BINDING
+- source revision: 4b5e131a670afb46ca87291479fed7c0fefcf370
+- validator sha256: 9c3f3076b5b45408d3eefc34cd567b58821aa565d3fe3bf6339641111079ede0
+- profile sha256: e107a2625d6819984749c9f0d03088cb3e903bec26245dec8ace85ddf76cc4fd
+- binding mode: byte-pinned, dependency-free, offline
+
+2026-08-14T09:26:00+02:00 FAIL-CLOSED-PROBES
+- profile byte drift: REJECTED by pinned profile digest
+- validator byte drift: REJECTED by pinned validator digest
+- syntactically valid transition drift with refreshed profile digest: REJECTED
+  by exact domain transition-set comparison
+- all probe edits were reverted with apply_patch and final digests rechecked
+
+2026-08-14T09:28:00+02:00 FINAL-EVIDENCE
+- `python3 standard/conformance.py --all`: PASS; existing 8
+  adversarial cases remain rejected.
+- `python3 -m ruff check --ignore E701,E702 standard/conformance.py standard/lifecycle.py`:
+  PASS. Full Ruff additionally reports pre-existing compact-line E701/E702
+  style in some domain validators; no bulk reformat was included.
+- `python3 -m compileall -q standard`: PASS.
+- networkless pinned Docker build/run: PASS.
+- `./project/governance-check.sh`: GOV-PASS, 0 errors, 0 warnings.
+- `git diff --check`: PASS.
+
+2026-08-14T09:32:00+02:00 PUBLICATION
+- pull request: https://github.com/wellmanifest/ticket-lifecycle/pull/2
+- implementation commit: d3dd98a757b03ecaf77c467da02a1e58bde2d9a1
+- accepted base: eab5e3bc10244783c7e60c326de08836e337d957
+- trusted current-head review and integration: pending

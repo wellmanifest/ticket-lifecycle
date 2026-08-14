@@ -1,5 +1,8 @@
 # Roadmap
 
+- [ ] [ticket-002](project/ticket-002/README.md) — adopt the byte-pinned
+  shared Lifecycle DSL validator and enforce exact governed ticket graph equality.
+
 - [x] [ticket-001](project/ticket-001/README.md) — establish the governed local
   seed baseline and define the standalone v1 contract.
 - [x] Define and validate the standalone v1 lifecycle contract.
