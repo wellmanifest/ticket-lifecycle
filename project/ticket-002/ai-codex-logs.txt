@@ -21,3 +21,9 @@
 - networkless pinned Docker build/run: PASS.
 - `./project/governance-check.sh`: GOV-PASS, 0 errors, 0 warnings.
 - `git diff --check`: PASS.
+
+2026-08-14T09:32:00+02:00 PUBLICATION
+- pull request: https://github.com/wellmanifest/ticket-lifecycle/pull/2
+- implementation commit: d3dd98a757b03ecaf77c467da02a1e58bde2d9a1
+- accepted base: eab5e3bc10244783c7e60c326de08836e337d957
+- trusted current-head review and integration: pending
