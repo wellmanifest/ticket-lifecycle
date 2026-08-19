@@ -88,9 +88,13 @@ directory itself.
 
 One implementation diff resolves to exactly one active ticket. Parallel work
 uses distinct manifest workstreams, non-overlapping allowed paths and separate
-worktrees. A waiting or blocked ticket releases its write reservation so it
+worktrees. When two worktrees of the same repository are `IN_PROGRESS` at
+once, each intent must either keep disjoint `allowedPaths` or list the other
+ticket in `conflictsWith`. The adopted `worktree-guard.yaml` checker from
+`wellmanifest/new-project` fail-closes undeclared overlap before `edit` /
+`validate`. A waiting or blocked ticket releases its write reservation so it
 cannot deadlock unrelated progress. A matching active ticket is reused rather
-than replaced.
+than replaced. See [WORKTREE_GUARD.md](WORKTREE_GUARD.md).
 
 ## Plan and bounded intent
 
