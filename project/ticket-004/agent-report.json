@@ -1,0 +1,29 @@
+{
+  "schema": "wellmanifest.agent/report/v1",
+  "workspaceRoot": ".",
+  "gitToplevel": ".",
+  "pwd": ".",
+  "home": "wellmanifest",
+  "shape": "domain_pack",
+  "runtimeOwner": "wellmanifest",
+  "adopt": [
+    "wellmanifest/new-project"
+  ],
+  "ticketId": "ticket-004",
+  "filesTouched": [
+    "docs/ARCHITECTURE.md",
+    "docs/WORKTREE_GUARD.md",
+    "project/TICKETS.md",
+    "project/ticket-004/README.md",
+    "project/ticket-004/intent.json",
+    "project/ticket-004/agent-report.json"
+  ],
+  "allowedPaths": [
+    "docs/ARCHITECTURE.md",
+    "docs/WORKTREE_GUARD.md",
+    "project/ticket-004/**",
+    "TODO.md",
+    "project/TICKETS.md"
+  ],
+  "outcome": "completed"
+}

@@ -1,0 +1,76 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-004",
+  "summary": "Require conflictsWith on overlapping worktrees",
+  "workstream": "integration",
+  "classification": {
+    "kind": "FEATURE",
+    "priority": "P1",
+    "origin": "requested"
+  },
+  "allowedPaths": [
+    "docs/ARCHITECTURE.md",
+    "docs/WORKTREE_GUARD.md",
+    "project/ticket-004/**",
+    "TODO.md",
+    "project/TICKETS.md"
+  ],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md",
+    "standard/ticket-lifecycle.schema.json",
+    "standard/conformance.py"
+  ],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "40848c814e95b8e248ac7366ce5aafb3e26beb89",
+    "targetBranch": "main",
+    "outcome": "ticket-lifecycle requires conflictsWith or disjoint allowedPaths when two worktrees are IN_PROGRESS on the same repository",
+    "nonGoals": [
+      "No schema or digest change",
+      "No new daemon"
+    ],
+    "complexity": "XS",
+    "estimatedMinutes": 15,
+    "budgets": {
+      "maxImplementationFiles": 3,
+      "maxAffectedComponents": 1,
+      "maxPublicInterfaceChanges": 1,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Document the conflictsWith requirement for sibling worktrees and point at new-project's worktree-guard.yaml. Do not change the v1 schema.",
+      "components": [
+        {
+          "name": "docs",
+          "paths": [
+            "docs/ARCHITECTURE.md",
+            "docs/WORKTREE_GUARD.md"
+          ]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [],
+      "dataChanges": [],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "Revert the two documentation files"
+    },
+    "runtimeDependencies": [],
+    "validation": [
+      {
+        "criterion": "AC-01",
+        "commands": [
+          "grep -n conflictsWith docs/ARCHITECTURE.md"
+        ],
+        "evidence": "Allocation section names sibling-worktree conflictsWith"
+      }
+    ]
+  }
+}
