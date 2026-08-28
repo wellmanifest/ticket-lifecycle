@@ -16,7 +16,7 @@ SCHEMA_PATH = ROOT / "ticket-lifecycle.schema.json"
 GRAMMAR_PATH = ROOT / "ticket-lifecycle.v1.gbnf"
 LIFECYCLE_PATH = ROOT / "ticket-lifecycle.lifecycle"
 LIFECYCLE_VALIDATOR_PATH = ROOT / "lifecycle.py"
-SCHEMA_DIGEST = "09f05e885634a65dd0e35c0ec74c23d9173b486e5dbb1b0abd690ccd0d7d6ba1"
+SCHEMA_DIGEST = "2392ded8321999069e4d0a39b865edf1a88adad94cb246cd6320833817ffff89"
 GRAMMAR_DIGEST = "3578a5b963d6b8c8e4e68df50bd9bfd0bb709584053227036826619bb429e8ee"
 LIFECYCLE_SOURCE_REVISION = "4b5e131a670afb46ca87291479fed7c0fefcf370"
 LIFECYCLE_VALIDATOR_DIGEST = "9c3f3076b5b45408d3eefc34cd567b58821aa565d3fe3bf6339641111079ede0"
@@ -144,6 +144,18 @@ def validate_block_receipt(doc: dict[str, object]) -> None:
         raise ContractError("blocked ticket must release scope and redact secrets")
 
 
+def validate_close_receipt(doc: dict[str, object]) -> None:
+    if doc.get("action") != "close" or doc.get("outcome") != "applied":
+        raise ContractError("not an applied close receipt")
+    if doc.get("beforeState") != "publication" or doc.get("afterState") != "done":
+        raise ContractError("close receipt must bind publication to done")
+    if doc.get("workstreamReleased") is not True or doc.get("secretsRedacted") is not True:
+        raise ContractError("close receipt must release scope and redact secrets")
+    evidence = doc.get("evidenceRefs")
+    if not isinstance(evidence, list) or not evidence:
+        raise ContractError("close receipt requires trusted integration evidence")
+
+
 def expect_rejected(name: str, validator, base: dict[str, object], mutation) -> str:
     doc = copy.deepcopy(base); mutation(doc)
     try:
@@ -165,7 +177,12 @@ def run_all() -> dict[str, object]:
     request = {"schema": "wellmanifest.ticket-lifecycle/v1", "kind": "transition-request", "requestId": "request:allocate", "repositoryRef": "repository:demo", "workstreamRef": "workstream:integration", "action": "allocate", "ticket": None, "expectedState": "unallocated", "targetState": "allocated", "intentRef": None, "authorizationRef": None, "evidenceRefs": ["artifact:request"], "idempotencyKey": "idempotency:allocate"}
     state = {"state": "editing", "acceptedBaseSha": "a" * 40, "sessionExecutionAuthorized": True, "trustedMergeApproved": False}
     receipt = {"action": "block", "outcome": "applied", "afterState": "blocked", "workstreamReleased": True, "secretsRedacted": True}
-    validate_request(request); validate_editing_state(state); validate_block_receipt(receipt)
+    close_receipt = {
+        "action": "close", "outcome": "applied", "beforeState": "publication",
+        "afterState": "done", "workstreamReleased": True, "secretsRedacted": True,
+        "evidenceRefs": ["receipt:trusted-integration"],
+    }
+    validate_request(request); validate_editing_state(state); validate_block_receipt(receipt); validate_close_receipt(close_receipt)
     rejected = [
         expect_rejected("shell-command", validate_request, request, lambda d: d.update(command="rm -rf")),
         expect_rejected("external-url", validate_request, request, lambda d: d.update(callbackUrl="https://attacker.invalid")),
@@ -175,8 +192,10 @@ def run_all() -> dict[str, object]:
         expect_rejected("editing-without-base", validate_editing_state, state, lambda d: d.update(acceptedBaseSha=None)),
         expect_rejected("editing-without-session-auth", validate_editing_state, state, lambda d: d.update(sessionExecutionAuthorized=False)),
         expect_rejected("block-keeps-reservation", validate_block_receipt, receipt, lambda d: d.update(workstreamReleased=False)),
+        expect_rejected("close-keeps-reservation", validate_close_receipt, close_receipt, lambda d: d.update(workstreamReleased=False)),
+        expect_rejected("close-without-evidence", validate_close_receipt, close_receipt, lambda d: d.update(evidenceRefs=[])),
     ]
-    return {"schema": "wellmanifest.ticket-lifecycle-conformance/v1", "ok": True, "positiveDocuments": 3, "adversarialRejected": rejected, "schemaDigest": "sha256:" + SCHEMA_DIGEST, "grammarDigest": "sha256:" + GRAMMAR_DIGEST}
+    return {"schema": "wellmanifest.ticket-lifecycle-conformance/v1", "ok": True, "positiveDocuments": 4, "adversarialRejected": rejected, "schemaDigest": "sha256:" + SCHEMA_DIGEST, "grammarDigest": "sha256:" + GRAMMAR_DIGEST}
 
 
 def main() -> int:

@@ -469,7 +469,12 @@
             },
             "required": ["action", "outcome"]
           },
-          "then": { "properties": { "afterState": { "const": "done" } } }
+          "then": {
+            "properties": {
+              "afterState": { "const": "done" },
+              "workstreamReleased": { "const": true }
+            }
+          }
         }
       ]
     }

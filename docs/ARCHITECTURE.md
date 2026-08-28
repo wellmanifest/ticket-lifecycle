@@ -2,7 +2,7 @@
 
 ```dsl
 DOCUMENT TICKET_LIFECYCLE
-VERSION 1
+VERSION 2
 LANGUAGE EN
 MODE STRICT
 SCHEMA "wellmanifest.ticket-lifecycle/v1"
@@ -98,7 +98,7 @@ than replaced. See [WORKTREE_GUARD.md](WORKTREE_GUARD.md).
 
 ## Plan and bounded intent
 
-Before implementation, the controller records:
+Before implementation in the working session, the controller records:
 
 - outcome and explicit non-goals;
 - `allowedPaths` and forbidden human-participant paths;
@@ -110,6 +110,12 @@ Before implementation, the controller records:
 No placeholder SHA is valid. For a new repository, `git-lifecycle` first
 creates the narrow governance-only seed baseline, then the resulting real SHA
 becomes `acceptedBaseSha` before the `edit` transition.
+
+The bounded intent does not require a plan-only Git commit. It may be included
+in the same atomic changeset as the first material implementation, provided
+the controller recorded and validated it before the first implementation write.
+This preserves the authority boundary without manufacturing a history-only
+commit.
 
 ## Authorization classes
 
@@ -139,11 +145,18 @@ current diff to intent scope, workstream ownership, accepted base, architecture
 and budgets. LLM findings remain advisory; required verdicts are deterministic
 and expose stable diagnostic codes.
 
-An implementation ticket remains `IN_PROGRESS / PUBLICATION` while its PR is
-open. Exact-head trusted review and required checks precede merge. `DONE / DONE`
-is written only by a governance-only closure from the integrated default
-branch, with merge SHA and post-merge evidence. Closing an unmerged full-diff
-branch is forbidden.
+An implementation ticket remains in `publication` while its PR is open.
+Exact-head trusted review and required checks precede merge. The protected
+delivery controller then applies `close` in its external lifecycle store and
+emits a receipt bound to the merge SHA, ticket and post-merge evidence. An
+applied close receipt must release the workstream.
+
+The merge receipt is the terminal source of truth. It must not create a
+repository commit, closure branch or closure PR, and it does not require
+rewriting `README.md`, `TODO.md`, `project/TICKETS.md`, an agent log or an
+artifact registry. Repository ticket files are the reviewed intent snapshot,
+not a second mutable lifecycle database. Closing an unmerged full-diff branch
+remains forbidden.
 
 ## Request and receipt boundary
 
@@ -163,7 +176,8 @@ ticket and intent reference.
   rejected.
 - `edit` requires a real accepted base and session authorization.
 - `publish` cannot create trusted approval; it stops at a reviewable PR.
-- `close` requires resolved trusted integration and post-merge evidence.
+- `close` requires resolved trusted integration and post-merge evidence,
+  releases the workstream and writes only the external transition receipt.
 - `block` preserves evidence and releases workstream/write reservations.
 - `resume` revalidates base, scope, dependencies and foreign workspace state.
 - Unknown references, state mismatch, scope overlap or missing evidence reject

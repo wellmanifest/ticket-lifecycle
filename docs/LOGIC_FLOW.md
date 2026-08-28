@@ -12,7 +12,7 @@ sequenceDiagram
     P->>V: closed AST
     V->>V: resolve intent, state, authorization and evidence refs
     V->>C: one authorized transition
-    C->>T: compare-and-set ticket state
+    C->>T: compare-and-set external ticket state
     T-->>C: observed state
     C->>R: redacted idempotent receipt
     R-->>M: receipt reference
@@ -23,6 +23,9 @@ choose the ticket number. Planning binds a real Git baseline, scope, budgets and
 validation evidence. Session authorization permits work only inside that
 intent. Publication stops at a reviewable PR, while `done` requires separately
 resolved trusted merge and post-merge evidence.
+
+The terminal transition releases the workstream and performs no repository
+write, closure commit or closure PR.
 
 `block` releases the workstream and write reservation while preserving context.
 `resume` revalidates the base, dependencies, scope and workspace before editing.
