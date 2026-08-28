@@ -1,0 +1,70 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-005",
+  "summary": "Eliminate repository ticket ceremony loops",
+  "workstream": "integration",
+  "classification": {
+    "kind": "BUG",
+    "priority": "P1",
+    "origin": "requested"
+  },
+  "allowedPaths": [
+    "standard/ticket-lifecycle.schema.json",
+    "standard/conformance.py",
+    "docs/ARCHITECTURE.md",
+    "docs/LOGIC_FLOW.md",
+    "project/ticket-005/**",
+    "TODO.md",
+    "project/TICKETS.md"
+  ],
+  "forbiddenPaths": ["project/ticket-*/user-*.md"],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "792ffe8460a46f14c8dde189ce848fe54e5bdec8",
+    "targetBranch": "main",
+    "outcome": "Close merged work through an external receipt and remove mandatory plan and closure repository commits",
+    "nonGoals": [
+      "No merge-authority weakening",
+      "No runtime daemon",
+      "No repository publication"
+    ],
+    "complexity": "S",
+    "estimatedMinutes": 25,
+    "budgets": {
+      "maxImplementationFiles": 4,
+      "maxAffectedComponents": 2,
+      "maxPublicInterfaceChanges": 0,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Keep the typed close transition but make its protected external receipt terminal authority; require scope release and no repository closure write.",
+      "components": [
+        {
+          "name": "standard",
+          "paths": ["standard/ticket-lifecycle.schema.json", "standard/conformance.py"]
+        },
+        {
+          "name": "documentation",
+          "paths": ["docs/ARCHITECTURE.md", "docs/LOGIC_FLOW.md"]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [],
+      "dataChanges": ["Applied close receipts require workstreamReleased=true"],
+      "ui": {"impact": "none", "states": [], "evidence": []},
+      "rollback": "Revert the schema invariant, conformance case and lifecycle documentation"
+    },
+    "runtimeDependencies": [],
+    "validation": [
+      {
+        "criterion": "AC-04",
+        "commands": ["PYTHONDONTWRITEBYTECODE=1 python3 standard/conformance.py --all"],
+        "evidence": "Conformance accepts external close receipt and rejects retained workstream or missing integration evidence"
+      }
+    ]
+  }
+}
