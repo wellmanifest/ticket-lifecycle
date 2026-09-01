@@ -14,6 +14,7 @@
     "project/TICKETS.md",
     ".governance/**",
     "AGENTS.md",
+    "goal.yaml",
     "project/governance-check.bat",
     "project/governance-check.sh",
     "project/new-ticket.sh"
@@ -50,7 +51,7 @@
         },
         {
           "name": "agent-and-project-adapters",
-          "paths": ["AGENTS.md"]
+          "paths": ["AGENTS.md", "goal.yaml"]
         }
       ],
       "responsibilityChanges": false,
