@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] [ticket-008](project/ticket-008/README.md) — define a closed split plan
+  that publishes completed material and preallocates the remaining bounded DAG.
+
 - [x] [ticket-006](project/ticket-006/README.md) — add an append-only,
   same-state work-continuity checkpoint transition.
 
