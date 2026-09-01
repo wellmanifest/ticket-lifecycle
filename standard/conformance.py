@@ -16,11 +16,11 @@ SCHEMA_PATH = ROOT / "ticket-lifecycle.schema.json"
 GRAMMAR_PATH = ROOT / "ticket-lifecycle.v1.gbnf"
 LIFECYCLE_PATH = ROOT / "ticket-lifecycle.lifecycle"
 LIFECYCLE_VALIDATOR_PATH = ROOT / "lifecycle.py"
-SCHEMA_DIGEST = "2392ded8321999069e4d0a39b865edf1a88adad94cb246cd6320833817ffff89"
-GRAMMAR_DIGEST = "3578a5b963d6b8c8e4e68df50bd9bfd0bb709584053227036826619bb429e8ee"
+SCHEMA_DIGEST = "0bcfe15aa82105e716e47e298a73ce9c67c9fb4b3629a8a0f0518d8c48b05dda"
+GRAMMAR_DIGEST = "154b052441ef0695164ba0c513b4fe4dcadbd07184292add47f89fc7443864f5"
 LIFECYCLE_SOURCE_REVISION = "4b5e131a670afb46ca87291479fed7c0fefcf370"
 LIFECYCLE_VALIDATOR_DIGEST = "9c3f3076b5b45408d3eefc34cd567b58821aa565d3fe3bf6339641111079ede0"
-LIFECYCLE_PROFILE_DIGEST = "e107a2625d6819984749c9f0d03088cb3e903bec26245dec8ace85ddf76cc4fd"
+LIFECYCLE_PROFILE_DIGEST = "af4e9eadcf336d1e295549da18ac0c24fca0e90d2946e7baee2e5541a30a32a4"
 
 TRANSITIONS = {
     "allocate": ("unallocated", "allocated"), "plan": ("allocated", "planned"),
@@ -29,6 +29,7 @@ TRANSITIONS = {
     "close": ("publication", "done"), "resume": ("blocked", "planned"),
 }
 BLOCK_SOURCES = {"allocated", "planned", "authorized", "editing", "validating", "publication"}
+CHECKPOINT_STATES = {"authorized", "editing", "validating", "publication", "blocked"}
 REQUEST_KEYS = {"schema", "kind", "requestId", "repositoryRef", "workstreamRef", "action", "ticket", "expectedState", "targetState", "intentRef", "authorizationRef", "evidenceRefs", "idempotencyKey"}
 REFS = {
     "requestId": r"^request:[a-z][a-z0-9._-]{0,95}$",
@@ -74,6 +75,9 @@ def validate_lifecycle_profile(schema: dict[str, object]) -> None:
     } | {
         (lifecycle_name(source), "BLOCKED", "BLOCK")
         for source in BLOCK_SOURCES
+    } | {
+        (lifecycle_name(state), lifecycle_name(state), "CHECKPOINT")
+        for state in CHECKPOINT_STATES
     }
     actual_transitions = {
         (item.source, item.target, item.event) for item in model.transitions
@@ -126,6 +130,15 @@ def validate_request(doc: dict[str, object]) -> None:
     if action == "block":
         if doc["expectedState"] not in BLOCK_SOURCES or doc["targetState"] != "blocked":
             raise ContractError("invalid block transition")
+    elif action == "checkpoint":
+        if doc["expectedState"] not in CHECKPOINT_STATES or doc["targetState"] != doc["expectedState"]:
+            raise ContractError("checkpoint must preserve an active state")
+        continuity = [
+            item for item in evidence
+            if re.fullmatch(r"receipt:continuity[.][a-z0-9._:-]+", str(item))
+        ]
+        if len(continuity) != 1:
+            raise ContractError("checkpoint requires exactly one continuity receipt")
     elif TRANSITIONS.get(action) != (doc["expectedState"], doc["targetState"]):
         raise ContractError("invalid transition")
 
@@ -156,6 +169,25 @@ def validate_close_receipt(doc: dict[str, object]) -> None:
         raise ContractError("close receipt requires trusted integration evidence")
 
 
+def validate_checkpoint_receipt(doc: dict[str, object]) -> None:
+    if doc.get("action") != "checkpoint" or doc.get("outcome") != "applied":
+        raise ContractError("not an applied checkpoint receipt")
+    before = doc.get("beforeState")
+    if before not in CHECKPOINT_STATES or doc.get("afterState") != before:
+        raise ContractError("checkpoint receipt must preserve state")
+    if doc.get("workstreamReleased") is not False or doc.get("secretsRedacted") is not True:
+        raise ContractError("checkpoint cannot release scope and must redact secrets")
+    evidence = doc.get("evidenceRefs")
+    if not isinstance(evidence, list) or len(evidence) != len(set(evidence)):
+        raise ContractError("checkpoint evidence must be unique")
+    continuity = [
+        item for item in evidence
+        if re.fullmatch(r"receipt:continuity[.][a-z0-9._:-]+", str(item))
+    ]
+    if len(continuity) != 1:
+        raise ContractError("checkpoint receipt requires exactly one continuity receipt")
+
+
 def expect_rejected(name: str, validator, base: dict[str, object], mutation) -> str:
     doc = copy.deepcopy(base); mutation(doc)
     try:
@@ -182,7 +214,26 @@ def run_all() -> dict[str, object]:
         "afterState": "done", "workstreamReleased": True, "secretsRedacted": True,
         "evidenceRefs": ["receipt:trusted-integration"],
     }
+    checkpoint_request = {
+        **request,
+        "requestId": "request:checkpoint",
+        "action": "checkpoint",
+        "ticket": "ticket-006",
+        "expectedState": "editing",
+        "targetState": "editing",
+        "intentRef": "artifact:intent",
+        "authorizationRef": "authorization:session",
+        "evidenceRefs": ["receipt:continuity.ticket-006.1.example"],
+        "idempotencyKey": "idempotency:checkpoint",
+    }
+    checkpoint_receipt = {
+        "action": "checkpoint", "outcome": "applied",
+        "beforeState": "editing", "afterState": "editing",
+        "workstreamReleased": False, "secretsRedacted": True,
+        "evidenceRefs": ["receipt:continuity.ticket-006.1.example"],
+    }
     validate_request(request); validate_editing_state(state); validate_block_receipt(receipt); validate_close_receipt(close_receipt)
+    validate_request(checkpoint_request); validate_checkpoint_receipt(checkpoint_receipt)
     rejected = [
         expect_rejected("shell-command", validate_request, request, lambda d: d.update(command="rm -rf")),
         expect_rejected("external-url", validate_request, request, lambda d: d.update(callbackUrl="https://attacker.invalid")),
@@ -194,8 +245,12 @@ def run_all() -> dict[str, object]:
         expect_rejected("block-keeps-reservation", validate_block_receipt, receipt, lambda d: d.update(workstreamReleased=False)),
         expect_rejected("close-keeps-reservation", validate_close_receipt, close_receipt, lambda d: d.update(workstreamReleased=False)),
         expect_rejected("close-without-evidence", validate_close_receipt, close_receipt, lambda d: d.update(evidenceRefs=[])),
+        expect_rejected("checkpoint-state-movement", validate_request, checkpoint_request, lambda d: d.update(targetState="validating")),
+        expect_rejected("checkpoint-wrong-evidence", validate_request, checkpoint_request, lambda d: d.update(evidenceRefs=["receipt:other"])),
+        expect_rejected("checkpoint-duplicate-evidence", validate_request, checkpoint_request, lambda d: d.update(evidenceRefs=["receipt:continuity.ticket-006.1.example"] * 2)),
+        expect_rejected("checkpoint-releases-scope", validate_checkpoint_receipt, checkpoint_receipt, lambda d: d.update(workstreamReleased=True)),
     ]
-    return {"schema": "wellmanifest.ticket-lifecycle-conformance/v1", "ok": True, "positiveDocuments": 4, "adversarialRejected": rejected, "schemaDigest": "sha256:" + SCHEMA_DIGEST, "grammarDigest": "sha256:" + GRAMMAR_DIGEST}
+    return {"schema": "wellmanifest.ticket-lifecycle-conformance/v1", "ok": True, "positiveDocuments": 6, "adversarialRejected": rejected, "schemaDigest": "sha256:" + SCHEMA_DIGEST, "grammarDigest": "sha256:" + GRAMMAR_DIGEST}
 
 
 def main() -> int:

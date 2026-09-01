@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] [ticket-006](project/ticket-006/README.md) — add an append-only,
+  same-state work-continuity checkpoint transition.
+
 - [x] [ticket-003](project/ticket-003/README.md) — require the shared Lifecycle
   DSL domain-conformance gate on pull requests and integrated `main` revisions.
 

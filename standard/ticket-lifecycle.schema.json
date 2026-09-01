@@ -67,6 +67,7 @@
         "publish",
         "close",
         "block",
+        "checkpoint",
         "resume"
       ]
     },
@@ -141,6 +142,46 @@
                 "publication"
               ]
             },
+            "targetState": { "const": "blocked" }
+          },
+          "required": ["action", "expectedState", "targetState"]
+        },
+        {
+          "properties": {
+            "action": { "const": "checkpoint" },
+            "expectedState": { "const": "authorized" },
+            "targetState": { "const": "authorized" }
+          },
+          "required": ["action", "expectedState", "targetState"]
+        },
+        {
+          "properties": {
+            "action": { "const": "checkpoint" },
+            "expectedState": { "const": "editing" },
+            "targetState": { "const": "editing" }
+          },
+          "required": ["action", "expectedState", "targetState"]
+        },
+        {
+          "properties": {
+            "action": { "const": "checkpoint" },
+            "expectedState": { "const": "validating" },
+            "targetState": { "const": "validating" }
+          },
+          "required": ["action", "expectedState", "targetState"]
+        },
+        {
+          "properties": {
+            "action": { "const": "checkpoint" },
+            "expectedState": { "const": "publication" },
+            "targetState": { "const": "publication" }
+          },
+          "required": ["action", "expectedState", "targetState"]
+        },
+        {
+          "properties": {
+            "action": { "const": "checkpoint" },
+            "expectedState": { "const": "blocked" },
             "targetState": { "const": "blocked" }
           },
           "required": ["action", "expectedState", "targetState"]
@@ -227,6 +268,46 @@
               ]
             },
             "afterState": { "enum": ["allocated", "planned", "authorized", "editing", "validating", "publication", "blocked"] }
+          },
+          "required": ["action", "beforeState", "afterState"]
+        },
+        {
+          "properties": {
+            "action": { "const": "checkpoint" },
+            "beforeState": { "const": "authorized" },
+            "afterState": { "const": "authorized" }
+          },
+          "required": ["action", "beforeState", "afterState"]
+        },
+        {
+          "properties": {
+            "action": { "const": "checkpoint" },
+            "beforeState": { "const": "editing" },
+            "afterState": { "const": "editing" }
+          },
+          "required": ["action", "beforeState", "afterState"]
+        },
+        {
+          "properties": {
+            "action": { "const": "checkpoint" },
+            "beforeState": { "const": "validating" },
+            "afterState": { "const": "validating" }
+          },
+          "required": ["action", "beforeState", "afterState"]
+        },
+        {
+          "properties": {
+            "action": { "const": "checkpoint" },
+            "beforeState": { "const": "publication" },
+            "afterState": { "const": "publication" }
+          },
+          "required": ["action", "beforeState", "afterState"]
+        },
+        {
+          "properties": {
+            "action": { "const": "checkpoint" },
+            "beforeState": { "const": "blocked" },
+            "afterState": { "const": "blocked" }
           },
           "required": ["action", "beforeState", "afterState"]
         },
@@ -320,6 +401,24 @@
           "else": {
             "properties": {
               "authorizationRef": { "$ref": "#/$defs/authorizationRef" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "action": { "const": "checkpoint" } },
+            "required": ["action"]
+          },
+          "then": {
+            "properties": {
+              "evidenceRefs": {
+                "contains": {
+                  "type": "string",
+                  "pattern": "^receipt:continuity[.][a-z0-9._:-]+$"
+                },
+                "minContains": 1,
+                "maxContains": 1
+              }
             }
           }
         }
@@ -473,6 +572,25 @@
             "properties": {
               "afterState": { "const": "done" },
               "workstreamReleased": { "const": true }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "action": { "const": "checkpoint" } },
+            "required": ["action"]
+          },
+          "then": {
+            "properties": {
+              "workstreamReleased": { "const": false },
+              "evidenceRefs": {
+                "contains": {
+                  "type": "string",
+                  "pattern": "^receipt:continuity[.][a-z0-9._:-]+$"
+                },
+                "minContains": 1,
+                "maxContains": 1
+              }
             }
           }
         }
