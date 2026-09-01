@@ -1,0 +1,53 @@
+{
+  "version": "1.0",
+  "project": {
+    "name": "ticket-lifecycle",
+    "type": "generic",
+    "description": "Standalone wellmanifest ticket lifecycle standard"
+  },
+  "versioning": {
+    "strategy": "semver",
+    "files": ["VERSION"],
+    "tag_format": "v{version}"
+  },
+  "git": {
+    "commit": {
+      "type": "conventional",
+      "scope": "ticket-lifecycle",
+      "require_ticket": true
+    },
+    "remote": {
+      "auto_push": false,
+      "branch_prefix": "ticket/"
+    },
+    "hooks": {}
+  },
+  "publishing": {
+    "enabled": false,
+    "registries": [],
+    "dry_run": false,
+    "fallback": {
+      "github_release": {
+        "enabled": true,
+        "owner": "wellmanifest",
+        "repo": "ticket-lifecycle",
+        "token_env": "GITHUB_TOKEN",
+        "create_on_tag": true,
+        "asset_glob": "dist/*"
+      }
+    }
+  },
+  "advanced": {
+    "auto_update_config": false
+  },
+  "governance": {
+    "delivery": {
+      "require_goal_a": true,
+      "default_mode": "pull-request",
+      "allowed_modes": ["pull-request", "direct-main"],
+      "remote": "origin",
+      "base_branch": "main",
+      "require_clean_governance": true
+    }
+  }
+}
