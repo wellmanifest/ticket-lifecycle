@@ -10,6 +10,7 @@ import re
 from pathlib import Path
 
 import lifecycle
+import split_plan
 
 ROOT = Path(__file__).resolve().parent
 SCHEMA_PATH = ROOT / "ticket-lifecycle.schema.json"
@@ -250,7 +251,16 @@ def run_all() -> dict[str, object]:
         expect_rejected("checkpoint-duplicate-evidence", validate_request, checkpoint_request, lambda d: d.update(evidenceRefs=["receipt:continuity.ticket-006.1.example"] * 2)),
         expect_rejected("checkpoint-releases-scope", validate_checkpoint_receipt, checkpoint_receipt, lambda d: d.update(workstreamReleased=True)),
     ]
-    return {"schema": "wellmanifest.ticket-lifecycle-conformance/v1", "ok": True, "positiveDocuments": 6, "adversarialRejected": rejected, "schemaDigest": "sha256:" + SCHEMA_DIGEST, "grammarDigest": "sha256:" + GRAMMAR_DIGEST}
+    split_result = split_plan.self_test()
+    return {
+        "schema": "wellmanifest.ticket-lifecycle-conformance/v1",
+        "ok": True,
+        "positiveDocuments": 6,
+        "adversarialRejected": rejected,
+        "schemaDigest": "sha256:" + SCHEMA_DIGEST,
+        "grammarDigest": "sha256:" + GRAMMAR_DIGEST,
+        "splitPlanConformance": split_result,
+    }
 
 
 def main() -> int:

@@ -1,0 +1,70 @@
+root ::= "{" ws schema comma kind comma plan-ref comma repository-ref comma parent-ticket comma slice-id comma idempotency-key comma parent comma completed-slice comma successors comma integration-owner-ticket ws "}"
+
+schema ::= "\"schema\"" ws ":" ws "\"wellmanifest.split-plan/v1\""
+kind ::= "\"kind\"" ws ":" ws "\"split-plan\""
+plan-ref ::= "\"planRef\"" ws ":" ws artifact
+repository-ref ::= "\"repositoryRef\"" ws ":" ws repository
+parent-ticket ::= "\"parentTicket\"" ws ":" ws ticket
+slice-id ::= "\"sliceId\"" ws ":" ws slice
+idempotency-key ::= "\"idempotencyKey\"" ws ":" ws idempotency
+
+parent ::= "\"parent\"" ws ":" ws "{" ws accepted-base-sha comma head-sha comma checkpoint-sha comma checkpoint-receipt comma snapshot-receipt comma secret-scan-receipt ws "}"
+accepted-base-sha ::= "\"acceptedBaseSha\"" ws ":" ws sha
+head-sha ::= "\"headSha\"" ws ":" ws sha
+checkpoint-sha ::= "\"checkpointSha\"" ws ":" ws sha
+checkpoint-receipt ::= "\"checkpointReceiptRef\"" ws ":" ws continuity-receipt
+snapshot-receipt ::= "\"snapshotReceiptRef\"" ws ":" ws snapshot-receipt-ref
+secret-scan-receipt ::= "\"secretScanReceiptRef\"" ws ":" ws secret-scan-receipt-ref
+
+completed-slice ::= "\"completedSlice\"" ws ":" ws "{" ws allowed-paths comma material-paths comma material-artifacts comma validation-receipts comma publication-state comma terminal-receipt ws "}"
+allowed-paths ::= "\"allowedPaths\"" ws ":" ws scope-array
+material-paths ::= "\"materialPaths\"" ws ":" ws material-path-array
+material-artifacts ::= "\"materialArtifactRefs\"" ws ":" ws artifact-array
+validation-receipts ::= "\"validationReceiptRefs\"" ws ":" ws receipt-array
+publication-state ::= "\"publicationState\"" ws ":" ws ("\"ready\"" | "\"published\"")
+terminal-receipt ::= "\"terminalReceiptRef\"" ws ":" ws nullable-receipt
+
+successors ::= "\"successors\"" ws ":" ws "[" ws successor (comma successor)* ws "]"
+successor ::= "{" ws node-id comma successor-ticket comma intent-ref comma allocation-receipt comma allowed-paths comma depends-on comma conflicts-with comma integration-owner comma successor-state comma terminal-receipt ws "}"
+node-id ::= "\"nodeId\"" ws ":" ws node
+successor-ticket ::= "\"ticket\"" ws ":" ws ticket
+intent-ref ::= "\"intentRef\"" ws ":" ws artifact
+allocation-receipt ::= "\"allocationReceiptRef\"" ws ":" ws allocation-receipt-ref
+depends-on ::= "\"dependsOn\"" ws ":" ws ticket-array
+conflicts-with ::= "\"conflictsWith\"" ws ":" ws ticket-array
+integration-owner ::= "\"integrationOwner\"" ws ":" ws boolean
+successor-state ::= "\"state\"" ws ":" ws ("\"allocated\"" | "\"planned\"" | "\"authorized\"" | "\"editing\"" | "\"validating\"" | "\"publication\"" | "\"blocked\"" | "\"done\"")
+integration-owner-ticket ::= "\"integrationOwnerTicket\"" ws ":" ws (ticket | "null")
+
+scope-array ::= "[" ws scope-path (comma scope-path)* ws "]"
+material-path-array ::= "[" ws material-path (comma material-path)* ws "]"
+artifact-array ::= "[" ws artifact (comma artifact)* ws "]"
+receipt-array ::= "[" ws receipt (comma receipt)* ws "]"
+ticket-array ::= "[" ws (ticket (comma ticket)*)? ws "]"
+nullable-receipt ::= receipt | "null"
+boolean ::= "true" | "false"
+
+artifact ::= "\"artifact:" ref-first ref-char* "\""
+repository ::= "\"repository:" ref-first ref-char* "\""
+ticket ::= "\"ticket-" digit digit digit digit* "\""
+slice ::= "\"slice:" ref-first ref-char* "\""
+node ::= "\"node:" ref-first ref-char* "\""
+idempotency ::= "\"idempotency:" ref-first ref-char* "\""
+receipt ::= "\"receipt:" ref-first ref-char* "\""
+continuity-receipt ::= "\"receipt:continuity." ref-first ref-char* "\""
+snapshot-receipt-ref ::= "\"receipt:snapshot." ref-first ref-char* "\""
+secret-scan-receipt-ref ::= "\"receipt:secret-scan." ref-first ref-char* "\""
+allocation-receipt-ref ::= "\"receipt:allocation." ref-first ref-char* "\""
+sha ::= "\"" hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex hex "\""
+scope-path ::= "\"" path-segment ("/" path-segment)* ("/**")? "\""
+material-path ::= "\"" path-segment ("/" path-segment)* "\""
+path-segment ::= path-first path-char* | "." path-first path-char*
+
+ref-first ::= [a-z]
+ref-char ::= [a-z0-9._:-]
+path-char ::= [A-Za-z0-9._-]
+path-first ::= [A-Za-z0-9_-]
+hex ::= [0-9a-f]
+digit ::= [0-9]
+comma ::= ws "," ws
+ws ::= [ \t\n\r]*

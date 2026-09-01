@@ -1,0 +1,88 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-008",
+  "summary": "Define split-plan lifecycle for oversized in-progress work",
+  "workstream": "integration",
+  "classification": {
+    "kind": "FEATURE",
+    "priority": "P1",
+    "origin": "requested"
+  },
+  "allowedPaths": [
+    "project/ticket-008/**",
+    "TODO.md",
+    "project/TICKETS.md",
+    "VERSION",
+    "docs/SPLIT_PLAN.md",
+    "standard/split-plan.schema.json",
+    "standard/split-plan.v1.gbnf",
+    "standard/split_plan.py",
+    "standard/conformance.py"
+  ],
+  "forbiddenPaths": ["project/ticket-*/user-*.md"],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "955ee86e24fdc4be568de44629546cce64138ed6",
+    "targetBranch": "main",
+    "outcome": "Stream a validated material slice now and recover the remaining oversized work as a deterministic bounded successor DAG.",
+    "nonGoals": [
+      "Do not execute Git, GitHub, shell, worktree or ticket-allocation operations from this contract",
+      "Do not store prompts, command transcripts, secrets or absolute host paths",
+      "Do not let a parent orchestration PR contain only ticket or status carriers"
+    ],
+    "complexity": "M",
+    "estimatedMinutes": 75,
+    "budgets": {
+      "maxImplementationFiles": 9,
+      "maxAffectedComponents": 3,
+      "maxPublicInterfaceChanges": 2,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Represent a split as an inert canonical AST whose parent slice is publishable material and whose preallocated successor graph is recovered by terminal-receipt subtraction.",
+      "components": [
+        {
+          "name": "split-plan-contract",
+          "paths": [
+            "standard/split-plan.schema.json",
+            "standard/split-plan.v1.gbnf",
+            "VERSION"
+          ]
+        },
+        {
+          "name": "semantic-conformance",
+          "paths": ["standard/split_plan.py", "standard/conformance.py"]
+        },
+        {
+          "name": "operator-guidance",
+          "paths": ["docs/SPLIT_PLAN.md", "project/ticket-008/**"]
+        }
+      ],
+      "responsibilityChanges": true,
+      "interfaceChanges": [
+        "wellmanifest.split-plan/v1 JSON AST",
+        "split-plan.v1.gbnf canonical generation profile"
+      ],
+      "dataChanges": [
+        "Successor nodes bind allocation and optional terminal receipts"
+      ],
+      "ui": {"impact": "none", "states": [], "evidence": []},
+      "rollback": "Revert the schema, grammar, semantic validator and split-plan guidance together."
+    },
+    "runtimeDependencies": [],
+    "validation": [
+      {
+        "criterion": "AC-05",
+        "commands": [
+          "PYTHONDONTWRITEBYTECODE=1 python3 standard/split_plan.py --self-test",
+          "./project/governance-check.sh --actor agent"
+        ],
+        "evidence": "Canonical positive document plus adversarial carrier-only, unsafe-path, overlapping-scope, dangling-dependency, allocation, receipt and replay cases."
+      }
+    ]
+  }
+}
