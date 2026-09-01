@@ -1,4 +1,4 @@
-root ::= allocate | plan | authorize | edit | validate | publish | close | block | resume
+root ::= allocate | plan | authorize | edit | validate | publish | close | block | checkpoint | resume
 
 allocate ::= prefix "allocate\",\"ticket\":null,\"expectedState\":\"unallocated\",\"targetState\":\"allocated\",\"intentRef\":null,\"authorizationRef\":null" suffix
 plan ::= prefix "plan\",\"ticket\":" ticket ",\"expectedState\":\"allocated\",\"targetState\":\"planned\",\"intentRef\":" artifact ",\"authorizationRef\":null" suffix
@@ -8,10 +8,17 @@ validate ::= prefix "validate\",\"ticket\":" ticket ",\"expectedState\":\"editin
 publish ::= prefix "publish\",\"ticket\":" ticket ",\"expectedState\":\"validating\",\"targetState\":\"publication\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization suffix
 close ::= prefix "close\",\"ticket\":" ticket ",\"expectedState\":\"publication\",\"targetState\":\"done\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization suffix
 block ::= prefix "block\",\"ticket\":" ticket ",\"expectedState\":" block-source ",\"targetState\":\"blocked\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization suffix
+checkpoint ::= checkpoint-authorized | checkpoint-editing | checkpoint-validating | checkpoint-publication | checkpoint-blocked
+checkpoint-authorized ::= prefix "checkpoint\",\"ticket\":" ticket ",\"expectedState\":\"authorized\",\"targetState\":\"authorized\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization continuity-suffix
+checkpoint-editing ::= prefix "checkpoint\",\"ticket\":" ticket ",\"expectedState\":\"editing\",\"targetState\":\"editing\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization continuity-suffix
+checkpoint-validating ::= prefix "checkpoint\",\"ticket\":" ticket ",\"expectedState\":\"validating\",\"targetState\":\"validating\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization continuity-suffix
+checkpoint-publication ::= prefix "checkpoint\",\"ticket\":" ticket ",\"expectedState\":\"publication\",\"targetState\":\"publication\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization continuity-suffix
+checkpoint-blocked ::= prefix "checkpoint\",\"ticket\":" ticket ",\"expectedState\":\"blocked\",\"targetState\":\"blocked\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization continuity-suffix
 resume ::= prefix "resume\",\"ticket\":" ticket ",\"expectedState\":\"blocked\",\"targetState\":\"planned\",\"intentRef\":" artifact ",\"authorizationRef\":" authorization suffix
 
 prefix ::= "{\"schema\":\"wellmanifest.ticket-lifecycle/v1\",\"kind\":\"transition-request\",\"requestId\":" request-id ",\"repositoryRef\":" repository ",\"workstreamRef\":" workstream ",\"action\":\""
 suffix ::= ",\"evidenceRefs\":" evidence-array ",\"idempotencyKey\":" idempotency "}"
+continuity-suffix ::= ",\"evidenceRefs\":[\"receipt:continuity." safe "\"],\"idempotencyKey\":" idempotency "}"
 block-source ::= "\"allocated\"" | "\"planned\"" | "\"authorized\"" | "\"editing\"" | "\"validating\"" | "\"publication\""
 request-id ::= "\"request:" safe "\""
 repository ::= "\"repository:" safe "\""
