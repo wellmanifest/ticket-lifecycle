@@ -1,0 +1,80 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-007",
+  "summary": "Adopt continuity-aware new-project 0.19.19",
+  "workstream": "governance",
+  "classification": {
+    "kind": "SERVICE",
+    "priority": "P1",
+    "origin": "requested"
+  },
+  "allowedPaths": [
+    "project/ticket-007/**",
+    "TODO.md",
+    "project/TICKETS.md",
+    ".governance/**",
+    "AGENTS.md",
+    "project/governance-check.bat",
+    "project/governance-check.sh",
+    "project/new-ticket.sh"
+  ],
+  "forbiddenPaths": ["project/ticket-*/user-*.md"],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "5bf581907a87b46a13a73e6c033d3abe4d9a306f",
+    "targetBranch": "main",
+    "outcome": "Adopt the published continuity-aware governance package without changing the ticket lifecycle contract.",
+    "nonGoals": [
+      "Do not change files under standard/** or docs/**",
+      "Do not close or implement ticket-006 in this governance ticket",
+      "Do not treat a checkpoint as renewed authority or a merge receipt"
+    ],
+    "complexity": "S",
+    "estimatedMinutes": 25,
+    "budgets": {
+      "maxImplementationFiles": 5,
+      "maxAffectedComponents": 2,
+      "maxPublicInterfaceChanges": 0,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Use Goal's immutable adoption projection so every managed byte is pinned to the published standard revision.",
+      "components": [
+        {
+          "name": "governance-package",
+          "paths": [".governance/**", "project/governance-check.sh", "project/governance-check.bat", "project/new-ticket.sh"]
+        },
+        {
+          "name": "agent-and-project-adapters",
+          "paths": ["AGENTS.md"]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [],
+      "dataChanges": [],
+      "ui": {"impact": "none", "states": [], "evidence": []},
+      "rollback": "Revert the complete generated adoption commit; never mix managed bytes from two revisions."
+    },
+    "runtimeDependencies": [],
+    "standardAdoption": {
+      "sourceRepository": "wellmanifest/new-project",
+      "fromRevision": "6800f0138bc9063eb2dacb0a8b797dedcafb7952",
+      "toRevision": "43999c793a86084b4c3198fe07be350105db59ec"
+    },
+    "validation": [
+      {
+        "criterion": "AC-04",
+        "commands": [
+          "goal governance adopt --source-revision 43999c793a86084b4c3198fe07be350105db59ec --check",
+          "./project/governance-check.sh --actor agent",
+          "git diff --check"
+        ],
+        "evidence": "Zero adoption drift, governance pass and no standard/** diff."
+      }
+    ]
+  }
+}
