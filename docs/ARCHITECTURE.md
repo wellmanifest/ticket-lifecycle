@@ -2,12 +2,12 @@
 
 ```dsl
 DOCUMENT TICKET_LIFECYCLE
-VERSION 2
+VERSION 3
 LANGUAGE EN
 MODE STRICT
-SCHEMA "wellmanifest.ticket-lifecycle/v1"
-REQUEST_GRAMMAR "ticket-lifecycle.v1.gbnf"
 POLICY "../.governance/manifest.json"
+LIFECYCLE_SCHEMA = "wellmanifest.ticket-lifecycle/v1"
+REQUEST_GRAMMAR = "ticket-lifecycle.v1.gbnf"
 ```
 
 ## Responsibility
@@ -56,15 +56,20 @@ STATE publication
 STATE done
 STATE blocked
 
-TRANSITION unallocated -> allocated ACTION allocate
-TRANSITION allocated -> planned ACTION plan
-TRANSITION planned -> authorized ACTION authorize
-TRANSITION authorized -> editing ACTION edit
-TRANSITION editing -> validating ACTION validate
-TRANSITION validating -> publication ACTION publish
-TRANSITION publication -> done ACTION close
-TRANSITION ACTIVE_NONTERMINAL -> blocked ACTION block
-TRANSITION blocked -> planned ACTION resume
+TRANSITION unallocated -> allocated WHEN ACTION = allocate
+TRANSITION allocated -> planned WHEN ACTION = plan
+TRANSITION planned -> authorized WHEN ACTION = authorize
+TRANSITION authorized -> editing WHEN ACTION = edit AND ACCEPTED_BASE_SHA_IS_REAL AND SESSION_EXECUTION_AUTHORIZATION
+TRANSITION editing -> validating WHEN ACTION = validate
+TRANSITION validating -> publication WHEN ACTION = publish
+TRANSITION publication -> done WHEN ACTION = close AND TRUSTED_INTEGRATION_RESOLVED AND POST_MERGE_EVIDENCE_RESOLVED
+TRANSITION allocated -> blocked WHEN ACTION = block
+TRANSITION planned -> blocked WHEN ACTION = block
+TRANSITION authorized -> blocked WHEN ACTION = block
+TRANSITION editing -> blocked WHEN ACTION = block
+TRANSITION validating -> blocked WHEN ACTION = block
+TRANSITION publication -> blocked WHEN ACTION = block
+TRANSITION blocked -> planned WHEN ACTION = resume
 ```
 
 The lifecycle state is separate from the ticket's public status fields. The
@@ -120,17 +125,31 @@ commit.
 ## Authorization classes
 
 ```dsl
-SESSION_EXECUTION_AUTHORIZATION =
+SESSION_EXECUTION_AUTHORIZATION = (
   USER_REQUEST_AUTHORIZES_EXECUTION_OR_AUTONOMOUS_MODE
   AND REQUESTED_OUTCOME_MATCHES_BOUNDED_INTENT
+)
 
-SEPARATE_AUTHORITY_REQUIRED =
+SEPARATE_AUTHORITY_REQUIRED = (
   DESTRUCTIVE_ACTION
   OR SECRET_ACCESS
   OR NEW_EXTERNAL_COORDINATION
   OR MATERIAL_OBJECTIVE_EXPANSION
   OR TRUSTED_MERGE
   OR RELEASE_PUBLICATION
+)
+
+RULE TICKET-AUTH-001 TYPE REQUIRED
+WHEN SESSION_EXECUTION_AUTHORIZATION AND SEPARATE_AUTHORITY_REQUIRED = false
+DO ALLOW TRANSITION_WITHIN_RECORDED_SCOPE_WITHOUT_REPEATED_PROMPT
+FORBID TREAT_SESSION_AUTHORIZATION_AS_TRUSTED_REVIEW_MERGE_OR_RELEASE
+NEXT editing
+
+RULE TICKET-AUTH-002 TYPE FORBIDDEN
+WHEN SEPARATE_AUTHORITY_REQUIRED
+DO REQUIRE SEPARATE_AUTHORITY_REFERENCE
+FORBID DERIVE_AUTHORITY_FROM_SESSION_EXECUTION_AUTHORIZATION
+NEXT blocked
 ```
 
 Session authorization prevents redundant prompts inside a stable, recorded

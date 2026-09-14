@@ -1,0 +1,81 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-010",
+  "summary": "Express lifecycle document fences as valid Policy DSL",
+  "workstream": "integration",
+  "classification": {
+    "kind": "BUG",
+    "priority": "P2",
+    "origin": "requested"
+  },
+  "allowedPaths": [
+    "project/ticket-010/**",
+    "TODO.md",
+    "project/TICKETS.md",
+    "docs/ARCHITECTURE.md"
+  ],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md",
+    "standard/**",
+    "schemas/**"
+  ],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "8512fa788d35ecf9bc3187b0445a81ffc137ce70",
+    "targetBranch": "main",
+    "outcome": "Every dsl fence in the changed documents is a valid Policy DSL v1 document whose rules and state graph match the existing prose and machine artifacts.",
+    "nonGoals": [
+      "No schema, grammar, blueprint or conformance change.",
+      "No release and no registry publish."
+    ],
+    "complexity": "XS",
+    "estimatedMinutes": 10,
+    "budgets": {
+      "maxImplementationFiles": 1,
+      "maxAffectedComponents": 1,
+      "maxPublicInterfaceChanges": 0,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Declares schema and grammar as bindings, rewrites transitions as `TRANSITION a -> b WHEN ACTION = x` with the six explicit block edges and the edit/close guards from the prose, parenthesizes the authorization expressions and adds rules TICKET-AUTH-001/002 for session versus separate authority. Document version 2 -> 3.",
+      "components": [
+        {
+          "name": "architecture-documentation",
+          "paths": [
+            "docs/ARCHITECTURE.md"
+          ]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [],
+      "dataChanges": [],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "Revert the commit; the documents return to the previous non-parseable fences."
+    },
+    "runtimeDependencies": [],
+    "validation": [
+      {
+        "criterion": "AC-01",
+        "commands": [
+          "python3 tests/policy_dsl_check.py validate-markdown docs/ARCHITECTURE.md"
+        ],
+        "evidence": "Pending exact-head publication."
+      },
+      {
+        "criterion": "AC-03",
+        "commands": [
+          "./project/governance-check.sh --base origin/main --head HEAD --actor agent"
+        ],
+        "evidence": "Pending exact-head publication."
+      }
+    ]
+  }
+}
