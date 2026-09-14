@@ -17,6 +17,8 @@
 - [x] Define and validate the standalone v1 lifecycle contract.
 - [ ] [ticket-007](project/ticket-007/README.md) — adopt published
   `new-project` v0.19.19 with protected continuity and terminal-receipt support.
+- [ ] Adopt the ticket execution lease contract in `git-lifecycle` and the
+  controller runtime after the canonical standard is published.
 - [x] Obtain trusted exact-head review and merge through the authorized pull
   request lifecycle. `ifuri-validator-agent` approved and merged
   `36fd7a356dcfee0767f61cce9064a21812300ebc`.
