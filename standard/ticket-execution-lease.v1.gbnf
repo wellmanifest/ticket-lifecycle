@@ -1,0 +1,11 @@
+root ::= lease | request | receipt
+lease ::= "{" ws "\"schema\":\"wellmanifest.ticket-execution-lease/v1\"," ws "\"kind\":\"execution-lease\"," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-number "," ws pair-number "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-number "," ws pair-number "," ws pair-number "}" ws
+request ::= "{" ws "\"schema\":\"wellmanifest.ticket-execution-lease-transition/v1\"," ws "\"kind\":\"lease-transition-request\"," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-number "," ws pair-number "," ws pair-string "," ws pair-null-string "," ws pair-null-string "," ws pair-null-string "," ws pair-string "," ws pair-string "," ws pair-array "," ws pair-string "}" ws
+receipt ::= "{" ws "\"schema\":\"wellmanifest.ticket-execution-lease-receipt/v1\"," ws "\"kind\":\"lease-transition-receipt\"," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-null-string "," ws pair-string "," ws pair-string "," ws pair-number "," ws pair-number "," ws pair-number "," ws pair-number "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-string "," ws pair-string "}" ws
+pair-string ::= string ":" string
+pair-null-string ::= string ":" (string | "null")
+pair-number ::= string ":" number
+pair-array ::= string ":" "[" ws string ("," ws string)* "]"
+string ::= "\"" [^\"]* "\""
+number ::= [0-9]+
+ws ::= [ \t\n\r]*

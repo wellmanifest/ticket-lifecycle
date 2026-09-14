@@ -1,0 +1,53 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-011",
+  "summary": "Define expiring execution leases and safe ticket takeover",
+  "workstream": "integration",
+  "classification": {
+    "kind": "FEATURE",
+    "priority": "P1",
+    "origin": "requested"
+  },
+  "allowedPaths": [
+    "standard/ticket-execution-lease.schema.json",
+    "standard/ticket-execution-lease.v1.gbnf",
+    "standard/lease_conformance.py",
+    "docs/LEASES.md",
+    "project/ticket-011/**",
+    "TODO.md",
+    "project/TICKETS.md"
+  ],
+  "forbiddenPaths": ["project/ticket-*/user-*.md"],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "8512fa788d35ecf9bc3187b0445a81ffc137ce70",
+    "targetBranch": "main",
+    "outcome": "Define a time-bounded execution lease with a ten-minute takeover grace period, conditional renewal and fencing-safe takeover for ticket worktrees.",
+    "nonGoals": [
+      "No automatic merge, branch deletion or credential handling",
+      "No takeover based only on process presence, idle time or a dirty checkout",
+      "No runtime daemon in the standard repository"
+    ],
+    "complexity": "S",
+    "estimatedMinutes": 30,
+    "budgets": {"maxImplementationFiles": 4, "maxAffectedComponents": 2, "maxPublicInterfaceChanges": 1, "maxRuntimeDependencies": 0},
+    "architecture": {
+      "status": "accepted",
+      "decision": "Make ticket-lifecycle the semantic owner of an execution lease. A lease is active for 3600 seconds, reclaimable only after a further 600-second grace period, and every renewal or takeover uses compare-and-swap generation plus fencing. git-lifecycle will consume this contract for worktree write fencing in a separate adapter change.",
+      "components": [
+        {"name": "lease-contract", "paths": ["standard/ticket-execution-lease.schema.json", "standard/ticket-execution-lease.v1.gbnf", "standard/lease_conformance.py"]},
+        {"name": "lease-guidance", "paths": ["docs/LEASES.md"]}
+      ],
+      "responsibilityChanges": true,
+      "interfaceChanges": ["wellmanifest.ticket-execution-lease/v1"],
+      "dataChanges": ["Lease records carry expiry, takeoverAt, generation and fencing values"],
+      "ui": {"impact": "none", "states": [], "evidence": []},
+      "rollback": "Revert the new lease contract and guidance; existing ticket lifecycle remains valid."
+    },
+    "runtimeDependencies": [],
+    "validation": [{"criterion": "AC-01", "commands": ["python3 standard/lease_conformance.py --all", "python3 standard/conformance.py --all", "./project/governance-check.sh --base origin/main --head HEAD --actor agent"], "evidence": "Pending exact-head publication."}]
+  }
+}
