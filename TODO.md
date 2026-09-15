@@ -22,3 +22,7 @@
 - [x] Obtain trusted exact-head review and merge through the authorized pull
   request lifecycle. `ifuri-validator-agent` approved and merged
   `36fd7a356dcfee0767f61cce9064a21812300ebc`.
+
+## Automatic Planfile synchronization — 2026-09-15
+
+- [x] Add the reusable GitHub Actions caller workflow pinned to `v0.1.126` — ticket-012.
