@@ -17,4 +17,5 @@ This file indexes governance tickets without taking ownership of
 | **ticket-010** | [`README.md`](./ticket-010/README.md) | [`preprompt.md`](./ticket-010/preprompt.md) | - |  [`ai-claude.md`](./ticket-010/ai-claude.md) |  [`ai-claude-logs.txt`](./ticket-010/ai-claude-logs.txt) | [`changelog.md`](./ticket-010/changelog.md) |
 | **ticket-011** | [`README.md`](./ticket-011/README.md) | [`preprompt.md`](./ticket-011/preprompt.md) | - |  [`ai-codex.md`](./ticket-011/ai-codex.md) |  [`ai-codex-logs.txt`](./ticket-011/ai-codex-logs.txt) | [`changelog.md`](./ticket-011/changelog.md) |
 | **ticket-012** | [`README.md`](./ticket-012/README.md) | [`preprompt.md`](./ticket-012/preprompt.md) | - |  [`ai-codex.md`](./ticket-012/ai-codex.md) |  [`ai-codex-logs.txt`](./ticket-012/ai-codex-logs.txt) | [`changelog.md`](./ticket-012/changelog.md) |
+| **ticket-013** | [`README.md`](./ticket-013/README.md) | [`preprompt.md`](./ticket-013/preprompt.md) | - |  [`ai-claude.md`](./ticket-013/ai-claude.md) |  [`ai-claude-logs.txt`](./ticket-013/ai-claude-logs.txt) | [`changelog.md`](./ticket-013/changelog.md) |
 <!-- AUTO:TICKET_INDEX:END -->
