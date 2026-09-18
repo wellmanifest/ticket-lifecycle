@@ -38,6 +38,7 @@
       },
       "governance": {
         "ownedPaths": [
+          ".gitignore",
           ".governance/**",
           "AGENTS.md",
           "README.md",
@@ -181,7 +182,7 @@
   ],
   "standard": {
     "id": "wellmanifest/new-project",
-    "version": "0.19.19"
+    "version": "0.20.32"
   },
   "ticket": {
     "activeStatuses": [
@@ -191,7 +192,7 @@
       "DONE",
       "CANCELLED"
     ],
-    "directoryPattern": "^ticket-[0-9]{3}$",
+    "directoryPattern": "^ticket-[0-9]{3,}$",
     "implementationStates": [
       "EDIT",
       "VALIDATION",
@@ -203,14 +204,9 @@
       "PLAN",
       "BLOCKED"
     ],
-    "requiredAgentFiles": [
-      "ai-*.md",
-      "ai-*-logs.txt"
-    ],
+    "requiredAgentFiles": [],
     "requiredFiles": [
       "README.md",
-      "preprompt.md",
-      "changelog.md",
       "intent.json"
     ],
     "root": "project"

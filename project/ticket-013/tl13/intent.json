@@ -1,0 +1,17 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-013",
+  "summary": "Adopt wellmanifest/new-project 0.20.32 governance standard",
+  "workstream": "governance",
+  "classification": {
+    "kind": "SERVICE",
+    "priority": "P2",
+    "origin": "health"
+  },
+  "allowedPaths": ["project/ticket-013/**", "TODO.md", "project/TICKETS.md"],
+  "forbiddenPaths": ["project/ticket-*/user-*.md"],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null
+}
