@@ -1,0 +1,72 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-014",
+  "summary": "document algocode triage and tripartite lifecycle",
+  "workstream": "integration",
+  "classification": {
+    "kind": "SERVICE",
+    "priority": "P2",
+    "origin": "health"
+  },
+  "allowedPaths": [
+    "project/ticket-014/**",
+    "TODO.md",
+    "project/TICKETS.md",
+    "docs/**"
+  ],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md"
+  ],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "ad363efa7705919ff613305172bf8115ccf50b15",
+    "targetBranch": "main",
+    "outcome": "Document Algocode issue triage and tripartite communication model in docs/ARCHITECTURE.md.",
+    "nonGoals": [
+      "No runtime code changes",
+      "No governance package modifications"
+    ],
+    "complexity": "S",
+    "estimatedMinutes": 30,
+    "budgets": {
+      "maxImplementationFiles": 5,
+      "maxAffectedComponents": 1,
+      "maxPublicInterfaceChanges": 0,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Document Algocode issue triage (deduplication, git commit reconciliation, actionability scoring) in docs/ARCHITECTURE.md.",
+      "components": [
+        {
+          "name": "docs",
+          "paths": [
+            "docs/ARCHITECTURE.md"
+          ]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [],
+      "dataChanges": [],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "Revert documentation changes to docs/ARCHITECTURE.md."
+    },
+    "runtimeDependencies": [],
+    "validation": [
+      {
+        "criterion": "AC-01",
+        "commands": [
+          "./project/governance-check.sh --base origin/main --head HEAD"
+        ],
+        "evidence": "Governance check passes with zero errors and zero warnings."
+      }
+    ]
+  }
+}

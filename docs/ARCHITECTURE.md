@@ -201,3 +201,25 @@ ticket and intent reference.
 - `resume` revalidates base, scope, dependencies and foreign workspace state.
 - Unknown references, state mismatch, scope overlap or missing evidence reject
   before repository mutation and yield a redacted receipt.
+
+## Algorithmic Triage & Tripartite Coordination (semcod/algocode)
+
+Before ticket allocation, raw requirements, human issues, and agent failure logs are processed through the **Tripartite Communication Pipeline** defined by [`wellmanifest/nl-dsl-llm`](https://github.com/wellmanifest/nl-dsl-llm) and executed algorithmically by [`semcod/algocode`](https://github.com/semcod/algocode):
+
+```mermaid
+flowchart TD
+    Issue[Incoming Issue / Prompt] --> Tripartite[Tripartite Router: wellmanifest/nl-dsl-llm]
+    Tripartite -->|issue.triage DSL| Engine[Deterministic Triage: semcod/algocode]
+    Engine -->|Jaccard Similarity| Dup[Duplicate Detection & Grouping]
+    Engine -->|Git Commit Reconcile| Res[ALREADY_RESOLVED Classification]
+    Engine -->|Actionability Score| Score[Triage & Priority Scoring]
+    Dup --> Alloc[Ticket Allocator]
+    Res --> Alloc
+    Score --> Alloc
+```
+
+### Deterministic Triage Rules:
+1. **Deduplication (`DUPLICATE`)**: Jaccard similarity across normalized issue titles and descriptions groups duplicate requests without human fatigue or LLM hallucination.
+2. **Git Commit Reconciliation (`ALREADY_RESOLVED`)**: Algorithmic cross-referencing between issue keywords and Git commit history identifies tasks already fulfilled in target branches.
+3. **DSL & MCP Parity**: Exposes `issue_triage` via standard JSON-RPC 2.0 MCP tools, ensuring model and human communicate through typed lifecycle AST documents instead of ungrounded chat prose.
+
