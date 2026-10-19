@@ -1,0 +1,76 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-015",
+  "summary": "Vendor compact Lifecycle DSL validator and compact ticket-lifecycle profile",
+  "workstream": "integration",
+  "classification": {
+    "kind": "SERVICE",
+    "priority": "P2",
+    "origin": "health"
+  },
+  "allowedPaths": [
+    "project/ticket-015/**",
+    "TODO.md",
+    "project/TICKETS.md",
+    "standard/conformance.py",
+    "standard/lifecycle.py",
+    "standard/ticket-lifecycle.lifecycle"
+  ],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md"
+  ],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "0a5547c1893ab85e283506402f568dc472883db0",
+    "targetBranch": "main",
+    "outcome": "Vendor compact Lifecycle DSL validator (wellmanifest/lifecycle 1ea2a90bd5b90a768ad2b36a9c1c330523bc80b4), compact standard/ticket-lifecycle.lifecycle to 0 compaction findings, and enforce zero compaction findings in conformance.py.",
+    "nonGoals": [
+      "No breaking changes to the ticket-lifecycle JSON Schema or state graph"
+    ],
+    "complexity": "S",
+    "estimatedMinutes": 15,
+    "budgets": {
+      "maxImplementationFiles": 3,
+      "maxAffectedComponents": 1,
+      "maxPublicInterfaceChanges": 0,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Update vendored standard/lifecycle.py to revision 1ea2a90bd5b90a768ad2b36a9c1c330523bc80b4, compact standard/ticket-lifecycle.lifecycle with STATES/EVENTS/EVIDENCES/multi-source TRANSITION constructs, and require finding_count == 0 in conformance.py.",
+      "components": [
+        {
+          "name": "standard",
+          "paths": [
+            "standard/conformance.py",
+            "standard/lifecycle.py",
+            "standard/ticket-lifecycle.lifecycle"
+          ]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [],
+      "dataChanges": [],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "Revert vendored validator, compacted profile, and updated digests in standard/."
+    },
+    "runtimeDependencies": [],
+    "validation": [
+      {
+        "criterion": "AC-01",
+        "commands": [
+          "python3 standard/conformance.py --all",
+          "./project/governance-check.sh --base origin/main"
+        ],
+        "evidence": "Conformance and governance checks pass with 0 compaction findings."
+      }
+    ]
+  }
+}

@@ -19,9 +19,9 @@ LIFECYCLE_PATH = ROOT / "ticket-lifecycle.lifecycle"
 LIFECYCLE_VALIDATOR_PATH = ROOT / "lifecycle.py"
 SCHEMA_DIGEST = "0bcfe15aa82105e716e47e298a73ce9c67c9fb4b3629a8a0f0518d8c48b05dda"
 GRAMMAR_DIGEST = "154b052441ef0695164ba0c513b4fe4dcadbd07184292add47f89fc7443864f5"
-LIFECYCLE_SOURCE_REVISION = "4b5e131a670afb46ca87291479fed7c0fefcf370"
-LIFECYCLE_VALIDATOR_DIGEST = "9c3f3076b5b45408d3eefc34cd567b58821aa565d3fe3bf6339641111079ede0"
-LIFECYCLE_PROFILE_DIGEST = "af4e9eadcf336d1e295549da18ac0c24fca0e90d2946e7baee2e5541a30a32a4"
+LIFECYCLE_SOURCE_REVISION = "1ea2a90bd5b90a768ad2b36a9c1c330523bc80b4"
+LIFECYCLE_VALIDATOR_DIGEST = "7f7f1c45b7611e186cc640ada69cf2849d16841564c4028b9fc06dd0a05c2b3a"
+LIFECYCLE_PROFILE_DIGEST = "cdff1cdea09fea94a23dbe26bcf7720fd472e14f0e720db7fff4547b920f8534"
 
 TRANSITIONS = {
     "allocate": ("unallocated", "allocated"), "plan": ("allocated", "planned"),
@@ -67,6 +67,8 @@ def validate_lifecycle_profile(schema: dict[str, object]) -> None:
     report = lifecycle.validate_path(LIFECYCLE_PATH, lifecycle.embedded_catalog())
     if not report.valid or len(report.lifecycles) != 1:
         raise ContractError("Lifecycle DSL profile is invalid")
+    if lifecycle.audit_path(LIFECYCLE_PATH)["finding_count"] != 0:
+        raise ContractError("Lifecycle DSL profile has compaction findings")
     model = report.lifecycles[0]
     state_values = schema["$defs"]["state"]["enum"]  # type: ignore[index]
     expected_states = {lifecycle_name(str(value)) for value in state_values}
