@@ -471,7 +471,7 @@ def self_test() -> dict[str, Any]:
 
     rejected = [
         _rejected("open-fields", base, lambda d: d.update(tool="git")),
-        _rejected("absolute-path", base, lambda d: d["successors"][0].update(allowedPaths=["/tmp/work"])),
+        _rejected("absolute-path", base, lambda d: d["successors"][0].update(allowedPaths=["/work"])),
         _rejected("traversal-path", base, lambda d: d["successors"][0].update(allowedPaths=["docs/../src"])),
         _rejected("dot-segment", base, lambda d: d["successors"][0].update(allowedPaths=["docs/./src"])),
         _rejected("carrier-only", base, lambda d: d["completedSlice"].update(materialPaths=["TODO.md"], allowedPaths=["TODO.md"])),

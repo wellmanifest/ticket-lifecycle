@@ -1,0 +1,79 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-016",
+  "summary": "Use a non-tmp absolute path in the split-plan negative fixture",
+  "workstream": "integration",
+  "classification": {
+    "kind": "SERVICE",
+    "priority": "P2",
+    "origin": "health"
+  },
+  "allowedPaths": [
+    "project/ticket-016/**",
+    "TODO.md",
+    "project/TICKETS.md",
+    "standard/split_plan.py"
+  ],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md"
+  ],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "59b2ef08f164c14ec68ee3e95056e20c6ed916ad",
+    "targetBranch": "main",
+    "outcome": "Replace the /tmp/work literal in the split_plan.py absolute-path negative fixture with /work so adopters' managed copies stop tripping GOV-NOHARDCODE-TMP-LEAK; self-test output stays byte-identical.",
+    "nonGoals": [
+      "No change to the split-plan schema, grammar, digests or validation behavior"
+    ],
+    "complexity": "XS",
+    "estimatedMinutes": 10,
+    "budgets": {
+      "maxImplementationFiles": 1,
+      "maxAffectedComponents": 1,
+      "maxPublicInterfaceChanges": 0,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Change one string literal in standard/split_plan.py::self_test; scopePath already rejects every path starting with '/', so the case still exercises the same rule.",
+      "components": [
+        {
+          "name": "standard",
+          "paths": [
+            "standard/split_plan.py"
+          ]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [],
+      "dataChanges": [],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "Revert the one-line literal change in standard/split_plan.py."
+    },
+    "runtimeDependencies": [],
+    "validation": [
+      {
+        "criterion": "AC-01",
+        "commands": [
+          "python3 -I standard/split_plan.py --self-test"
+        ],
+        "evidence": "Self-test output is byte-identical before and after; the absolute-path case is still rejected."
+      },
+      {
+        "criterion": "AC-02",
+        "commands": [
+          "./project/governance-check.sh --base origin/main",
+          "wellman check --root ."
+        ],
+        "evidence": "Governance and Wellman standards checks pass."
+      }
+    ]
+  }
+}
