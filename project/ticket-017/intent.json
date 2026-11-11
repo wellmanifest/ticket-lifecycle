@@ -1,0 +1,93 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-017",
+  "summary": "Modularize split_plan under 500 lines and harden ticket and lease conformance inputs, types, and I/O",
+  "workstream": "integration",
+  "classification": {
+    "kind": "BUG",
+    "priority": "P1",
+    "origin": "health"
+  },
+  "allowedPaths": [
+    "project/ticket-016/README.md",
+    "project/ticket-017/**",
+    "TODO.md",
+    "project/TICKETS.md",
+    "standard/ticket_io.py",
+    "standard/split_plan.py",
+    "standard/conformance.py",
+    "standard/lease_conformance.py",
+    "standard/test_ticket_lifecycle.py"
+  ],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md"
+  ],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "0b6ef7c23c609ffe4ea7e22670ac0fb772f3ed8c",
+    "targetBranch": "main",
+    "outcome": "Extract bounded non-symlink JSON/RFC3339/secret-scanning helpers into standard/ticket_io.py so standard/split_plan.py drops strictly below 500 lines while retaining standalone fallback compatibility, harden standard/conformance.py and standard/lease_conformance.py against non-string/unhashable/traversal/secret/subsecond inputs, add standard/test_ticket_lifecycle.py, and mark merged ticket-016 DONE.",
+    "nonGoals": [
+      "Do not modify vendored standard/lifecycle.py or pinned schema/grammar files",
+      "Do not introduce runtime dependencies or /tmp path literals"
+    ],
+    "complexity": "S",
+    "estimatedMinutes": 25,
+    "budgets": {
+      "maxImplementationFiles": 5,
+      "maxAffectedComponents": 1,
+      "maxPublicInterfaceChanges": 0,
+      "maxRuntimeDependencies": 0
+    },
+    "architecture": {
+      "status": "accepted",
+      "decision": "Share bounded JSON/file/secret/RFC3339 helpers in standard/ticket_io.py across standard/split_plan.py, standard/conformance.py, and standard/lease_conformance.py with an inline stdlib fallback in split_plan.py for standalone copies.",
+      "components": [
+        {
+          "name": "standard",
+          "paths": [
+            "standard/ticket_io.py",
+            "standard/split_plan.py",
+            "standard/conformance.py",
+            "standard/lease_conformance.py",
+            "standard/test_ticket_lifecycle.py"
+          ]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [],
+      "dataChanges": [],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "Revert the ticket-017 branch commit or close the pull request before merge."
+    },
+    "runtimeDependencies": [],
+    "validation": [
+      {
+        "criterion": "AC-01",
+        "commands": [
+          "ruff check --no-cache standard/ticket_io.py standard/split_plan.py standard/conformance.py standard/lease_conformance.py standard/test_ticket_lifecycle.py",
+          "PYTHONDONTWRITEBYTECODE=1 python3 standard/conformance.py --all",
+          "PYTHONDONTWRITEBYTECODE=1 python3 standard/lease_conformance.py --all",
+          "PYTHONDONTWRITEBYTECODE=1 python3 standard/split_plan.py --self-test"
+        ],
+        "evidence": "project/ticket-017/README.md"
+      },
+      {
+        "criterion": "AC-02",
+        "commands": [
+          "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s standard -p 'test_*.py' -v",
+          "./project/governance-check.sh --base origin/main",
+          "wellman check"
+        ],
+        "evidence": "project/ticket-017/README.md"
+      }
+    ]
+  }
+}
